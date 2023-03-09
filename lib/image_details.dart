@@ -48,9 +48,19 @@ class _ImageDetailsState extends State<ImageDetails> {
       currentStep ??= 0;
       progress = currentStep / item.numInferenceSteps!;
     } else {
+      var imageHost = "localhost";
+      if (item.host != null && item.host!.endsWith(".com")) {
+        imageHost = "https://${item.host}";
+      } else {
+        if (item.host != null) {
+          imageHost = "http://${item.host}:8000";
+        } else {
+          imageHost = "http://localhost:8000";
+        }
+      }
       image = CachedNetworkImage(
         placeholder: (context, url) => const CircularProgressIndicator(),
-        imageUrl: "http://localhost:8000/${item.filename}",
+        imageUrl: "${imageHost}/${item.filename}",
         imageBuilder: (context, imageProvider) {
           imageProvider
               .obtainKey(createLocalImageConfiguration(context))

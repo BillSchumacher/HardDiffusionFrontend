@@ -7,8 +7,14 @@ import 'package:hard_diffusion/forms/infer_text_to_image.dart';
 import 'package:hard_diffusion/generated_images.dart';
 import 'package:hard_diffusion/state/app.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+SharedPreferences? prefs;
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  prefs = await SharedPreferences.getInstance();
   runApp(const MyApp());
 }
 

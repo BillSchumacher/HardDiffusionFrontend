@@ -1,10 +1,11 @@
 import 'package:hard_diffusion/api/network_service.dart';
 import 'package:hard_diffusion/list_page.dart';
+import 'package:hard_diffusion/main.dart';
 import 'package:uuid_type/uuid_type.dart';
 import 'package:flutter/foundation.dart';
 
 class GeneratedImage {
-  final Uuid taskId;
+  final Uuid? taskId;
   final int id;
   final String filename;
   final String? host;
@@ -22,7 +23,7 @@ class GeneratedImage {
   final bool? error;
 
   const GeneratedImage(
-      {required this.taskId,
+      {this.taskId,
       required this.id,
       required this.filename,
       this.host,
@@ -47,8 +48,12 @@ class GeneratedImage {
     }
     var model = json['model'];
     model ??= 'CompVis/StableDiffusion-1.4';
+    var taskId;
+    if (json['task_id'] != null) {
+      taskId = Uuid.parse(json['task_id']);
+    }
     return GeneratedImage(
-      taskId: Uuid.parse(json['task_id']),
+      taskId: taskId,
       id: json['id'] as int,
       filename: json['filename'] as String,
       host: json['host'],
@@ -69,9 +74,16 @@ class GeneratedImage {
 }
 
 Future<ListPage<GeneratedImage>> fetchPhotos(int lastPage, int pageSize) async {
+  final remoteHost = prefs!.getString("remoteHost") ?? "localhost:8000";
+  final secureHost = prefs!.getBool("secureHost") ?? false;
+  var apiHost;
+  if (secureHost) {
+    apiHost = "https://$remoteHost";
+  } else {
+    apiHost = "http://$remoteHost";
+  }
   final response = await NetworkService().get(
-      'http://localhost:8000/api/images/?format=json&sort[]=-created_at&&page=$lastPage&page_size=$pageSize');
-
+      '${apiHost}/api/v1/images/?format=json&sort[]=-created_at&&page=$lastPage&page_size=$pageSize');
   // Use the compute function to run parsePhotos in a separate isolate.
   return compute(parsePhotos, response);
 }
