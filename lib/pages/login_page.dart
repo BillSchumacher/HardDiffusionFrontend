@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hard_diffusion/api/authentication.dart';
 import 'package:hard_diffusion/constants.dart';
 import 'package:hard_diffusion/state/auth.dart';
+import 'package:hard_diffusion/state/text_to_image_websocket.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -28,11 +29,14 @@ class _LoginPageState extends State<LoginPage> {
       var tokens =
           await fetchTokens(_usernameController.text, _passwordController.text);
 
-      var appState = Provider.of<AuthState>(context, listen: false);
-      appState.setAccessToken(tokens.accessToken);
-      appState.setRefreshToken(tokens.refreshToken);
+      var authState = Provider.of<AuthState>(context, listen: false);
+      authState.setAccessToken(tokens.accessToken);
+      authState.setRefreshToken(tokens.refreshToken);
+      var websocketState =
+          Provider.of<TextToImageWebsocketState>(context, listen: false);
       _redirecting = true;
       _passwordController.clear();
+      websocketState.connect();
       Navigator.of(context).pushReplacementNamed('/generate');
     } on Exception catch (error) {
       context.showErrorSnackBar(message: error.toString());
@@ -68,8 +72,9 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    _usernameController.dispose();
-    _passwordController.dispose();
+    // Disposing these controllers breaks on reload.
+    //_usernameController.dispose();
+    //_passwordController.dispose();
     //_authStateSubscription.cancel();
     super.dispose();
   }

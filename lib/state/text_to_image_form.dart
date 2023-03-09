@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hard_diffusion/api/network_service.dart';
 import 'package:hard_diffusion/main.dart';
+import 'package:hard_diffusion/state/auth.dart';
 import 'package:html/parser.dart';
+import 'package:provider/provider.dart';
 
 class TextToImageFormState extends ChangeNotifier {
   TextToImageFormState() {
@@ -109,7 +111,7 @@ class TextToImageFormState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void generate() async {
+  void generate(context) async {
     if (inferenceFormKey.currentState!.validate()) {
       inferenceFormKey.currentState!.save();
       var map = new Map<String, dynamic>();
@@ -129,10 +131,18 @@ class TextToImageFormState extends ChangeNotifier {
       var csrf = document.querySelectorAll("input").first.attributes["value"];
       map["csrfmiddlewaretoken"] = csrf;
       ns.headers["X-CSRFToken"] = csrf!;
-      response = await ns.post(
-        "$apiHost/api/v1/images",
-        body: map,
-      );
+
+      var authState = Provider.of<AuthState>(context, listen: false);
+      ns.headers["Authorization"] = "Bearer ${authState.accessToken}";
+      try {
+        response = await ns.post(
+          "$apiHost/api/v1/images",
+          body: map,
+        );
+      } catch (e) {
+        context.showErrorSnackBar(message: e.toString());
+        print(e);
+      }
     }
   }
 }

@@ -35,9 +35,7 @@ class PromptField extends StatelessWidget {
             initialValue: promptValue,
             maxLines: lines,
             decoration: InputDecoration(
-              border: OutlineInputBorder(),
               filled: true,
-              fillColor: Colors.white,
               hintText: 'An astronaut riding on a horse.',
             ),
           )

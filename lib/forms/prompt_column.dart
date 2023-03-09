@@ -91,7 +91,8 @@ class PromptForm extends StatelessWidget {
               Column(
                 children: [
                   ElevatedButton(
-                      onPressed: appState.generate, child: Text('Generate')),
+                      onPressed: () => appState.generate(context),
+                      child: Text('Generate')),
                   if (connected && channel != null) ...[
                     Text("Connected"),
                   ] else ...[
@@ -121,7 +122,9 @@ class PromptForm extends StatelessWidget {
               value: appState.useNsfw,
               setValue: appState.setUseNsfw,
               label: "NSFW"),
-          ElevatedButton(onPressed: appState.generate, child: Text('Generate')),
+          ElevatedButton(
+              onPressed: () => appState.generate(context),
+              child: Text('Generate')),
           Column(
             children: [
               if (connected && channel != null) ...[
