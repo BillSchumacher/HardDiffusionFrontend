@@ -41,7 +41,6 @@ class GeneratedImage {
       this.error});
 
   factory GeneratedImage.fromJson(Map<String, dynamic> json) {
-    var negativePrompt = json['negative_prompt'];
     var generatedAt = json['generated_at'];
     if (generatedAt != null) {
       generatedAt = DateTime.parse(generatedAt);
@@ -74,16 +73,8 @@ class GeneratedImage {
 }
 
 Future<ListPage<GeneratedImage>> fetchPhotos(int lastPage, int pageSize) async {
-  final remoteHost = prefs!.getString("remoteHost") ?? "localhost:8000";
-  final secureHost = prefs!.getBool("secureHost") ?? false;
-  var apiHost;
-  if (secureHost) {
-    apiHost = "https://$remoteHost";
-  } else {
-    apiHost = "http://$remoteHost";
-  }
   final response = await NetworkService().get(
-      '${apiHost}/api/v1/images/?format=json&sort[]=-created_at&&page=$lastPage&page_size=$pageSize');
+      '$apiHost/api/v1/images/?format=json&sort[]=-created_at&&page=$lastPage&page_size=$pageSize');
   // Use the compute function to run parsePhotos in a separate isolate.
   return compute(parsePhotos, response);
 }

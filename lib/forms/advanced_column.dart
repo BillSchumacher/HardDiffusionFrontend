@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hard_diffusion/forms/fields/float_input.dart';
 import 'package:hard_diffusion/forms/fields/integer_input.dart';
 import 'package:hard_diffusion/forms/fields/toggle_switch.dart';
-import 'package:hard_diffusion/state/app.dart';
+import 'package:hard_diffusion/state/text_to_image_form.dart';
 import 'package:provider/provider.dart';
 
 class AdvancedColumn extends StatelessWidget {
@@ -16,7 +16,7 @@ class AdvancedColumn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //var useMultipleModels = appState.useMultipleModels;
-    var appState = context.watch<MyAppState>();
+    var appState = context.watch<TextToImageFormState>();
     var useRandomSeed = appState.useRandomSeed;
     var seed = appState.seed;
     var width = appState.width;

@@ -1,7 +1,7 @@
 import 'package:hard_diffusion/forms/advanced_column.dart';
 import 'package:hard_diffusion/forms/prompt_column.dart';
 import 'package:flutter/material.dart';
-import 'package:hard_diffusion/state/app.dart';
+import 'package:hard_diffusion/state/text_to_image_form.dart';
 import 'package:provider/provider.dart';
 
 class InferTextToImageForm extends StatelessWidget {
@@ -9,7 +9,7 @@ class InferTextToImageForm extends StatelessWidget {
   final bool landscape;
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
+    var appState = context.watch<TextToImageFormState>();
     var useAdvanced = appState.useAdvanced;
     if (landscape) {
       return Form(

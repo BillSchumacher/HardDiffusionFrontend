@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hard_diffusion/components/show_advanced_options_button.dart';
 import 'package:hard_diffusion/forms/advanced_column.dart';
 import 'package:hard_diffusion/forms/fields/prompts.dart';
 import 'package:hard_diffusion/forms/fields/toggle_switch.dart';
-import 'package:hard_diffusion/state/app.dart';
+import 'package:hard_diffusion/state/text_to_image_form.dart';
+import 'package:hard_diffusion/state/text_to_image_websocket.dart';
 import 'package:provider/provider.dart';
 
 class PromptColumn extends StatelessWidget {
@@ -41,9 +43,10 @@ class PromptForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var channel = appState.channel;
-    var connected = appState.webSocketConnected;
+    var appState = context.watch<TextToImageFormState>();
+    var websocketState = context.watch<TextToImageWebsocketState>();
+    var channel = websocketState.channel;
+    var connected = websocketState.webSocketConnected;
     var prompt = appState.prompt;
     var negativePrompt = appState.negativePrompt;
     return Column(
@@ -68,20 +71,7 @@ class PromptForm extends StatelessWidget {
               Expanded(
                 child: Column(
                   children: [
-                    ElevatedButton(
-                        onPressed: () => showDialog(
-                            context: context,
-                            builder: (context) {
-                              return SingleChildScrollView(
-                                child: AlertDialog(
-                                  //scrollable: true,
-                                  content: AdvancedColumn(
-                                    landscape: landscape,
-                                  ),
-                                ),
-                              );
-                            }),
-                        child: Text("Show Advanced")),
+                    ShowAdvancedOptionsButton(landscape: landscape),
                     /*
                     ToggleSwitch(
                         value: appState.useAdvanced,

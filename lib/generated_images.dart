@@ -3,7 +3,8 @@ import 'package:hard_diffusion/api/images/generated_image.dart';
 import 'package:hard_diffusion/exception_indicators/empty_list_indicator.dart';
 import 'package:hard_diffusion/exception_indicators/error_indicator.dart';
 import 'package:hard_diffusion/image_details.dart';
-import 'package:hard_diffusion/state/app.dart';
+import 'package:hard_diffusion/state/text_to_image_form.dart';
+import 'package:hard_diffusion/state/text_to_image_websocket.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -53,7 +54,7 @@ class PhotosList extends StatelessWidget {
       ),
       itemCount: photos.length,
       itemBuilder: (context, index) {
-        return Image.network("http://localhost:8000/${photos[index].filename}");
+        return Image.network("http://$imageHost/${photos[index].filename}");
       },
     );
   }
@@ -124,10 +125,11 @@ class _GeneratedImageListViewState extends State<GeneratedImageListView> {
 
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    if (appState.needsRefresh) {
+    var appState = context.watch<TextToImageFormState>();
+    var websocketState = context.watch<TextToImageWebsocketState>();
+    if (websocketState.needsRefresh) {
       _pagingController.refresh();
-      appState.didRefresh();
+      websocketState.didRefresh();
     }
     return RefreshIndicator(
       onRefresh: () => Future.sync(

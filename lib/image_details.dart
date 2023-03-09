@@ -5,7 +5,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:hard_diffusion/api/images/generated_image.dart';
-import 'package:hard_diffusion/state/app.dart';
+import 'package:hard_diffusion/main.dart';
+import 'package:hard_diffusion/state/text_to_image_websocket.dart';
 import 'package:provider/provider.dart';
 import 'package:super_clipboard/super_clipboard.dart';
 
@@ -28,7 +29,7 @@ class _ImageDetailsState extends State<ImageDetails> {
 
   @override
   Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
+    var appState = context.watch<TextToImageWebsocketState>();
     var previewImage = appState.taskPreview[item.taskId];
     var currentStep = appState.taskCurrentStep[item.taskId];
     var image;
@@ -48,19 +49,16 @@ class _ImageDetailsState extends State<ImageDetails> {
       currentStep ??= 0;
       progress = currentStep / item.numInferenceSteps!;
     } else {
-      var imageHost = "localhost";
-      if (item.host != null && item.host!.endsWith(".com")) {
-        imageHost = "https://${item.host}";
+      String itemHost = "";
+      if (item.host != null && item.host != imageHost) {
+        // Should probably just pass the http[s]:// prefix in the API
+        itemHost = "https://${item.host}";
       } else {
-        if (item.host != null) {
-          imageHost = "http://${item.host}:8000";
-        } else {
-          imageHost = "http://localhost:8000";
-        }
+        itemHost = imageHost;
       }
       image = CachedNetworkImage(
         placeholder: (context, url) => const CircularProgressIndicator(),
-        imageUrl: "${imageHost}/${item.filename}",
+        imageUrl: "$itemHost/${item.filename}",
         imageBuilder: (context, imageProvider) {
           imageProvider
               .obtainKey(createLocalImageConfiguration(context))
