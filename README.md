@@ -1,6 +1,8 @@
 HardDiffusion
 =============
 
+This project has moved to GitLab: https://gitlab.com/hard-diffusion/HardDiffusionFrontend
+
 Inspired by EasyDiffusion
 
 This works, kinda, expect issues.
