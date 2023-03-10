@@ -1,4 +1,3 @@
-import 'package:hard_diffusion/forms/advanced_column.dart';
 import 'package:hard_diffusion/forms/prompt_column.dart';
 import 'package:flutter/material.dart';
 import 'package:hard_diffusion/state/text_to_image_form.dart';

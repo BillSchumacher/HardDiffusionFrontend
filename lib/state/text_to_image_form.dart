@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hard_diffusion/api/authentication.dart';
 import 'package:hard_diffusion/api/network_service.dart';
 import 'package:hard_diffusion/main.dart';
 import 'package:hard_diffusion/state/auth.dart';
+import 'package:hard_diffusion/state/text_to_image_websocket.dart';
 import 'package:html/parser.dart';
+import 'package:hard_diffusion/constants.dart';
 import 'package:provider/provider.dart';
 
 class TextToImageFormState extends ChangeNotifier {
@@ -131,17 +134,24 @@ class TextToImageFormState extends ChangeNotifier {
       var csrf = document.querySelectorAll("input").first.attributes["value"];
       map["csrfmiddlewaretoken"] = csrf;
       ns.headers["X-CSRFToken"] = csrf!;
-
-      var authState = Provider.of<AuthState>(context, listen: false);
-      ns.headers["Authorization"] = "Bearer ${authState.accessToken}";
+      var websocketState =
+          Provider.of<TextToImageWebsocketState>(context, listen: false);
+      map["session_id"] = websocketState.sessionId;
       try {
         response = await ns.post(
           "$apiHost/api/v1/images",
           body: map,
         );
-      } catch (e) {
-        context.showErrorSnackBar(message: e.toString());
-        print(e);
+      } on BadRequestException catch (e) {
+        showErrorSnackBar(context: context, message: e.cause);
+        print(e.cause);
+      } on TokenRefreshException catch (e) {
+        showErrorSnackBar(context: context, message: e.cause);
+        print(e.cause);
+        Navigator.of(context).pushReplacementNamed('/login');
+      } on Exception catch (e) {
+        showErrorSnackBar(context: context, message: e.toString());
+        print(e.toString());
       }
     }
   }

@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hard_diffusion/api/authentication.dart';
 import 'package:hard_diffusion/constants.dart';
 import 'package:hard_diffusion/state/auth.dart';
 import 'package:hard_diffusion/state/text_to_image_websocket.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -32,12 +34,13 @@ class _LoginPageState extends State<LoginPage> {
       var authState = Provider.of<AuthState>(context, listen: false);
       authState.setAccessToken(tokens.accessToken);
       authState.setRefreshToken(tokens.refreshToken);
-      var websocketState =
-          Provider.of<TextToImageWebsocketState>(context, listen: false);
       _redirecting = true;
       _passwordController.clear();
-      websocketState.connect();
       Navigator.of(context).pushReplacementNamed('/generate');
+    } on BadRequestException catch (error) {
+      context.showErrorSnackBar(message: error.cause);
+    } on UnauthorizedException catch (error) {
+      context.showErrorSnackBar(message: error.cause);
     } on Exception catch (error) {
       context.showErrorSnackBar(message: error.toString());
     } catch (error) {
@@ -81,6 +84,12 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    var websocketState = context.watch<TextToImageWebsocketState>();
+    if (websocketState.webSocketAuthenticated) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).pushReplacementNamed('/generate');
+      });
+    }
     return Scaffold(
       appBar: AppBar(title: const Text('Sign In')),
       body: ListView(
@@ -99,10 +108,32 @@ class _LoginPageState extends State<LoginPage> {
             ),
           ),
           const SizedBox(height: 18),
-          ElevatedButton(
-            onPressed: _isLoading ? null : _signIn,
-            child: Text(_isLoading ? 'Loading' : 'Login'),
-          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: _isLoading ? null : _signIn,
+                child: Text(_isLoading ? 'Loading' : 'Login'),
+              ),
+              const SizedBox(width: 18),
+              ElevatedButton(
+                  style: ButtonStyle(
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          Colors.blue.shade500)),
+                  onPressed: () => launchUrl(Uri.parse(
+                      'http://localhost:8000/api/v1/oauth/twitter?session_id=${websocketState.sessionId}')),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8.0),
+                        child: SvgPicture.asset('assets/twitter_logo_white.svg',
+                            width: 16, height: 16, color: Colors.white),
+                      ),
+                      Text('Sign in with Twitter'),
+                    ],
+                  )),
+            ],
+          )
         ],
       ),
     );

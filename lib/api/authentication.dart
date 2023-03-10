@@ -13,19 +13,59 @@ class TokenPair {
   }
 }
 
+class AccessToken {
+  final String accessToken;
+
+  const AccessToken(this.accessToken);
+
+  factory AccessToken.fromJson(Map<String, dynamic> json) {
+    return AccessToken(json['access']);
+  }
+}
+
 Future<TokenPair> fetchTokens(String username, String password) async {
   var map = new Map<String, dynamic>();
   map["username"] = username;
   map["password"] = password;
-  final response =
-      await NetworkService().post('$apiHost/api/v1/token/', body: map);
-  return compute(parseTokens, response);
+  var ns = NetworkService();
+  final response = await ns.post('$apiHost/api/v1/token/', body: map);
+  TokenPair tokenPair = await compute(parseTokens, response);
+  ns.updateTokenPair(tokenPair);
+  return tokenPair;
+}
+
+Future<AccessToken> refreshAccess() async {
+  var map = new Map<String, dynamic>();
+  var ns = NetworkService();
+  map["refresh"] = ns.refreshToken;
+  final response = await ns.post('$apiHost/api/v1/token/refresh/', body: map);
+  AccessToken accessToken = await compute(parseAccessToken, response);
+  ns.updateAccessToken(accessToken.accessToken);
+  return accessToken;
 }
 
 TokenPair parseTokens(dynamic jsonResponse) {
   return TokenPair.fromJson(jsonResponse);
 }
 
+AccessToken parseAccessToken(dynamic jsonResponse) {
+  return AccessToken.fromJson(jsonResponse);
+}
+
+class TokenRefreshException implements Exception {
+  String cause;
+  TokenRefreshException(this.cause);
+}
+
+class BadRequestException implements Exception {
+  String cause;
+  BadRequestException(this.cause);
+}
+
+class UnauthorizedException implements Exception {
+  String cause;
+  UnauthorizedException(this.cause);
+}
 /*
 Example code, from https://flutter.dev/docs/cookbook/networking/fetch-data
 Future<Album> fetchAlbum() async {

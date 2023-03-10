@@ -18,6 +18,22 @@ extension ShowSnackBar on BuildContext {
   }
 }
 
+void showSnackBar({
+  required BuildContext context,
+  required String message,
+  Color backgroundColor = Colors.white,
+}) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(message),
+    backgroundColor: backgroundColor,
+  ));
+}
+
+void showErrorSnackBar(
+    {required BuildContext context, required String message}) {
+  showSnackBar(context: context, message: message, backgroundColor: Colors.red);
+}
+
 const List<Color> backgroundGradient = [
   Color(0xff1f005c),
   Color(0xff5b0060),
